@@ -1,0 +1,135 @@
+{
+
+  "Routes": [
+    // Customer Web Api
+    {
+      "UpstreamPathTemplate": "/api/Customer",
+      "UpstreamHttpMethod": [ "Get", "Post", "Put" ],
+
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "s_customerwebapi",
+          "Port": 8080
+        }
+      ],
+      "DownstreamPathTemplate": "/api/Customer"
+    },
+    {
+      "UpstreamPathTemplate": "/api/Customer/{id}",
+      "UpstreamHttpMethod": [ "Get", "Delete" ],
+
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "s_customerwebapi",
+          "Port": 8080
+        }
+      ],
+      "DownstreamPathTemplate": "/api/Customer/{id}"
+    },
+
+
+    // Product Web Api
+    {
+      "UpstreamPathTemplate": "/api/Product",
+      "UpstreamHttpMethod": [ "Get", "Post", "Put" ],
+
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "s_productwebapi",
+          "Port": 8080
+        }
+      ],
+      "DownstreamPathTemplate": "/api/Product",
+
+      // Authentication yapılandırmasını Ocelot Api Gateway katmanında uyarlamak için;
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Bearer",
+        "AllowedScopes": []
+      },
+
+      // Role bazlı authentication uygulamak için;
+      "RouteClaimsRequirement": {
+        "Role": "Administrator"
+      }
+    },
+    {
+      "UpstreamPathTemplate": "/api/Product/{id}",
+      "UpstreamHttpMethod": [ "Get", "Delete" ],
+
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "s_productwebapi",
+          "Port": 8080
+        }
+      ],
+      "DownstreamPathTemplate": "/api/Product/{id}"
+    },
+
+
+    // Order Web Api
+    {
+      "UpstreamPathTemplate": "/api/Order",
+      "UpstreamHttpMethod": [ "Get", "Post", "Put" ],
+
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "s_orderwebapi",
+          "Port": 8080
+        }
+      ],
+      "DownstreamPathTemplate": "/api/Order",
+
+      // Rate Limiting yapılandırmasını uygulamak için;
+      "RateLimitOptions": {
+        "ClientWhiteList": [], // Rate Limiting den etkilenmeyecek kullanıcıların IP adresleri burada tanımlanır.
+        "EnableRateLimiting": true,
+        "Period": "60s", // 10s, 5m, 1h, 4d şeklinde de tanımlanabilir. Istemci her 60 saniyede aşağıda belirttiimiz Limit kadar istek yapabilir.
+        "PeriodTimeSpan": 60, // Period ile aynı amaca hizmet eder, tek fark süreyi TimeSpan olarakda belirleyebiliriz.
+        "Limit": 1 // Belirtilen period zamanında en fazla bu sayı kadar istek yapabilir.
+      }
+    },
+    {
+      "UpstreamPathTemplate": "/api/Order/{id}",
+      "UpstreamHttpMethod": [ "Get", "Delete" ],
+
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "s_orderwebapi",
+          "Port": 8080
+        }
+      ],
+      "DownstreamPathTemplate": "/api/Order/{id}"
+    },
+
+    // Authentication Web Api
+    {
+      "UpstreamPathTemplate": "/api/Account",
+      "UpstreamHttpMethod": [ "Post" ],
+
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "s_authenticationwebapi",
+          "Port": 8080
+        }
+      ],
+      "DownstreamPathTemplate": "/api/Account"
+    }
+
+  ],
+
+  "GlobalConfiguration": {
+    "BaseUrl": "http://localhost:8001",
+    "RateLimitOptions": {
+      "QuotaExceededMessage": "Frequent requests are not allowed!",
+      "HttpStatusCode": 777
+    }
+  }
+
+}

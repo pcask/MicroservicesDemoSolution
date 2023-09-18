@@ -1,0 +1,104 @@
+version: '3.4'
+
+networks:
+  backend:
+
+services:
+
+  s_customer_db:
+    container_name: c_customer_db
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    environment:
+      - ACCEPT_EULA=Y
+      - MSSQL_SA_PASSWORD=123456qaZ*
+    ports:
+      - 8002:1433
+    networks:
+      - backend
+  
+  s_customerwebapi:
+    container_name: c_customer_api
+    image: ${DOCKER_REGISTRY-}customerwebapi
+    build:
+      context: .
+      dockerfile: Microservices/Customer/CustomerWebApi/Dockerfile
+    networks:
+      - backend
+    environment:
+      - DB_HOST=s_customer_db
+      - DB_NAME=dms_customer
+      - DB_SA_PASSWORD=123456qaZ*
+  
+  s_product_db:
+    container_name: c_product_db
+    image: mysql
+    environment:
+      - MYSQL_ROOT_PASSWORD=123456qaZ*
+    ports:
+      - 8003:3306
+    networks:
+      - backend
+  
+  s_productwebapi:
+    container_name: c_product_api
+    image: ${DOCKER_REGISTRY-}productwebapi
+    build:
+      context: .
+      dockerfile: Microservices/Product/ProductWebApi/Dockerfile
+    networks:
+      - backend
+    environment:
+      - DB_HOST=s_product_db
+      - DB_NAME=dms_product
+      - DB_ROOT_PASSWORD=123456qaZ*
+  
+  s_order_db:
+    container_name: c_order_db
+    image: mongo:latest
+    restart: unless-stopped
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: 123456qaZ*
+    ports:
+      - 8005:27017
+    networks:
+      - backend
+
+  s_orderwebapi:
+    container_name: c_order_api 
+    image: ${DOCKER_REGISTRY-}orderwebapi
+    build:
+      context: .
+      dockerfile: Microservices/Order/OrderWebApi/Dockerfile
+    networks:
+      - backend
+    environment:
+      - DB_HOST=s_order_db
+      - DB_PORT=27017
+      - CLIENT_DB_NAME=dms_order
+      - DB_ROOT_PASSWORD=123456qaZ*
+
+  s_apigateway:
+    container_name: c_api_gateway
+    image: ${DOCKER_REGISTRY-}apigateway
+    build:
+      context: .
+      dockerfile: ApiGateway/Dockerfile
+    ports:
+      - 8001:8080
+    networks:
+      - backend
+
+  s_authenticationwebapi:
+    container_name: c_authentication_api
+    image: ${DOCKER_REGISTRY-}authenticationwebapi
+    build:
+      context: .
+      dockerfile: AuthenticationWebApi/Dockerfile
+    networks:
+      - backend
+
+
+
+# TODO:  Create a new UI project and a new network (e.g frontend). Then, make only this project communicate with ApiGateway project
+
